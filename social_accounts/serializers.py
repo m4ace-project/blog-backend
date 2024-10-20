@@ -23,7 +23,7 @@ class GoogleSignInSerializer(serializers.Serializer):
             raise AuthenticationFailed(detail="could not verify user")
         
         email=google_user_data['email']
-        role=user_data['role']
+        #role=user_data['role']
         provider="google"
-        return register_social_user(provider, email, role)
+        return register_social_user(provider, email)
     
