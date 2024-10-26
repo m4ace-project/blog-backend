@@ -4,26 +4,25 @@ from django.conf import settings
 from rest_framework.exceptions import AuthenticationFailed
 
 
-
-
 class GoogleSignInSerializer(serializers.Serializer):
     access_token=serializers.CharField(min_length=6)
     
     
-    
     def validate_access_token(self, access_token):
-        google_user_data=Google.validate(access_token)
+        user_data=Google.validate(access_token)
         try:
-            userid=google_user_data["sub"]
+            user_data["sub"]
         
         except:
             raise serializers.ValidationError("This token is invalid or has expired")
         
-        if google_user_data['aud'] != settings.GOOGLE_CLIENT_ID:
+        if user_data['aud'] != settings.GOOGLE_CLIENT_ID:
             raise AuthenticationFailed(detail="could not verify user")
         
-        email=google_user_data['email']
-        #role=user_data['role']
+        user_id = user_data['sub']
+        email=user_data['email']
+        role=user_data['role']
         provider="google"
-        return register_social_user(provider, email)
+        
+        return register_social_user(provider, email, role)
     

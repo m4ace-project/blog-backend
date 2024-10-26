@@ -35,7 +35,7 @@ SECRET_KEY = env('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*', 'http://localhost:5173']
 
 
 # Application definition
@@ -67,6 +67,13 @@ MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
 ]
 
+CORS_ALLOW_ALL_ORIGINS=True
+CORS_ALLOW_CREDENTIALS=True
+CORS_TRUSTED_ORIGINS = [
+    'http://localhost:5173',
+    'http://localhost:3000',
+]
+
 ROOT_URLCONF = 'backend.urls'
 
 TEMPLATES = [
@@ -92,16 +99,29 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.sqlite3',
+    #     'NAME': BASE_DIR / 'db.sqlite3',
+    # },
+    
+    
+     "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "USER": "postgres",
+        "NAME": "m4aceblog",
+        "PASSWORD": "admin",
+        "HOST": "localhost",
+        "PORT": "5432",
+        },
 }
 
 AUTH_USER_MODEL="accounts.User"
 
 REST_FRAMEWORK = {
+    'NON_FIELD_ERRORS_KEY':'error',
     'DEFAULT_AUTHENTICATION_CLASSES': (
+       'rest_framework.authentication.SessionAuthentication',
        'rest_framework_simplejwt.authentication.JWTAuthentication',
     )
 }
@@ -163,9 +183,7 @@ EMAIL_USE_TLS = True
 
 
 # Settings for social accounts
-
 GOOGLE_CLIENT_ID = env('GOOGLE_CLIENT_ID')
 GOOGLE_CLIENT_SECRET = env('GOOGLE_CLIENT_SECRET')
 SOCIAL_AUTH_PASSWORD = env('SOCIAL_PASSWORD')
-
 
