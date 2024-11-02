@@ -10,7 +10,8 @@ services:
     name: m4aceblog
     runtime: python
     buildCommand: "./build.sh"
-    startCommand: "python -m gunicorn backend.asgi:application -k uvicorn.workers.UvicornWorker"    envVars:
+    startCommand: "python -m gunicorn backend.asgi:application -k uvicorn.workers.UvicornWorker"    
+    envVars:
       - key: DATABASE_URL
         fromDatabase:
           name: m4aceblogdb
@@ -19,3 +20,4 @@ services:
         generateValue: true
       - key: WEB_CONCURRENCY
         value: 4
+        
