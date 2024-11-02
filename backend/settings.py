@@ -33,7 +33,7 @@ environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*', 'http://localhost:5173']
 
@@ -75,8 +75,6 @@ MIDDLEWARE = [
 CORS_ALLOW_ALL_ORIGINS=True
 CORS_ALLOW_CREDENTIALS=True
 CORS_TRUSTED_ORIGINS = [
-    'http://localhost:5173',
-    'http://localhost:3000',
 ]
 
 ROOT_URLCONF = 'backend.urls'
@@ -175,7 +173,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 
 # =============   this is for render   =============================
 if not DEBUG:    # Tell Django to copy static assets into a path called `staticfiles` (this is specific to Render)
