@@ -1,0 +1,21 @@
+databases:
+  - name: m4aceblogdb
+    plan: free
+    databaseName: m4aceblog
+    user: m4ace
+
+services:
+  - type: web
+    plan: free
+    name: m4aceblog
+    runtime: python
+    buildCommand: "./build.sh"
+    startCommand: "python -m gunicorn backend.asgi:application -k uvicorn.workers.UvicornWorker"    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: m4aceblogdb
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: WEB_CONCURRENCY
+        value: 4
