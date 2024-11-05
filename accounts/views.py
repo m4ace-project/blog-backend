@@ -2,11 +2,12 @@ from ast import Expression
 from multiprocessing import context
 from django.shortcuts import render
 from rest_framework.generics import GenericAPIView
+from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import User, OneTimePassword
 from .serializers import UserRegisterSerializer, LoginSerializer, PasswordResetRequestSerializer, SetNewPasswordSerializer, LogoutUserSerializer
 from rest_framework import status
-from .utils import send_generated_otp_to_email
+from .utils import send_verification_email
 from django.utils.http import urlsafe_base64_decode
 from django.utils.encoding import smart_str, DjangoUnicodeDecodeError
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
@@ -22,31 +23,45 @@ class RegisterUserView(GenericAPIView):
         serializer=self.serializer_class(data=user_data)
         
         if serializer.is_valid():
-            serializer.save()
-            user=serializer.data
-            send_generated_otp_to_email(user['email'], request)
-            # Send email function user ['email]
+            user = serializer.save()
+
+            # Generate a unique verification token
+            token_obj = OneTimePassword.objects.create(user=user)
+
+            # Send the email with the verification email link
+            send_verification_email(user.email, token_obj.token)
+
             return Response({
-                'data': user,
-                'message': "Hi! Thanks for signing up a passcode is sent to your email"
+                'data': serializer.data,
+                'message': "Hi! Thanks for signing up, use the link sent to your email to verify your account."
             }, status=status.HTTP_201_CREATED)
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class VerifyUserEmail(GenericAPIView):
-    def post(self, request):
+
+
+class VerifyUserEmail(APIView):
+    def get(self, request):
+        token = request.query_params.get('token')
+        if not token:
+            return Response({'message': 'Verification token is required'}, status=status.HTTP_400_BAD_REQUEST)
+
         try:
-            passcode = request.data.get('otp')
-            user_pass_obj=OneTimePassword.objects.get(otp=passcode)
-            user=user_pass_obj.user
+            # Retrieve user with the matching token
+            user_pass_obj = OneTimePassword.objects.get(token=token)
+            user = user_pass_obj.user
+
             if not user.is_verified:
-                user.is_verified=True
+                # Mark the user as verified
+                user.is_verified = True
                 user.save()
-                return Response({
-                    'message':'account email verified successfully'
-                }, status=status.HTTP_200_OK)
-            return Response({'message':'passcode is invalid user is already verified'}, status=status.HTTP_204_NO_CONTENT)
-        except OneTimePassword.DoesNotExist as identifier:
-            return Response({'message':'passcode not provided'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+                return Response({'message': 'Account email verified successfully, you can proceed to login'}, status=status.HTTP_200_OK)
+
+        except OneTimePassword.DoesNotExist:
+            return Response({'message': 'Invalid or expired verification link'}, status=status.HTTP_400_BAD_REQUEST)
         
 
 class LoginUserView(GenericAPIView):

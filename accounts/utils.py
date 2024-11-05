@@ -1,26 +1,24 @@
-import random
 from django.core.mail import EmailMessage
-from .models import User, OneTimePassword
 from django.conf import settings
-from django.contrib.sites.shortcuts import get_current_site
+from django.utils.http import urlencode
 
 
-def send_generated_otp_to_email(email, request):
-    subject ="One time passcode for Email verification"
-    otp = random.randint(1000, 9999)
-    current_site=get_current_site(request).domain    
-    user = User.objects.get(email=email)
-    email_body=f"Hi! {user.email} thanks for signing up on {current_site} please verify your email with the \n one time passcode {otp}"
-    from_email=settings.EMAIL_HOST
-    otp_ob = OneTimePassword.objects.create(user=user, otp=otp)
-    
-    # Send the email
-    d_email=EmailMessage(subject=subject, body=email_body, from_email=from_email, to=[user.email]) 
-    d_email.send()
+def send_verification_email(email, token):
+
+    # Build the verification link
+    verification_url = f"{settings.FRONTEND_URL}/api/verify-email/?{urlencode({'token': token})}"
+
+    # Email content
+    subject = 'Email Verification'
+    message = f"Please click the link to verify your email: {verification_url}"
+
+    # Send the verification email
+    email = EmailMessage(subject, message, settings.DEFAULT_FROM_EMAIL, [email])
+    email.send(fail_silently=False)
 
 
 def send_normal_email(data):
-    email=EmailMessage(
+    email = EmailMessage(
         subject=data['email_subject'],
         body=data['email_body'],
         from_email=settings.EMAIL_HOST_USER,
@@ -28,4 +26,13 @@ def send_normal_email(data):
     )
     email.send()
 
-
+    
+def send_custom_email(data):
+    email = EmailMessage(
+        subject=data['email_subject'],
+        body=data['email_body'],
+        from_email=settings.EMAIL_HOST_USER,
+        to=[data['to_email']]
+    )
+    email.send()
+        

@@ -14,6 +14,7 @@ import os
 import environ
 from pathlib import Path
 from datetime import timedelta
+from django.core.mail import EmailMessage
 
 env = environ.Env(
     # Set casting, default value
@@ -75,6 +76,8 @@ MIDDLEWARE = [
 CORS_ALLOW_ALL_ORIGINS=True
 CORS_ALLOW_CREDENTIALS=True
 CORS_TRUSTED_ORIGINS = [
+    "http://localhost:5173",
+    "http://localhost:3000",
 ]
 
 ROOT_URLCONF = 'backend.urls'
@@ -117,10 +120,10 @@ DATABASES = {
         "HOST": "localhost",
         "PORT": "5432",
         },
-    'default': dj_database_url.config( 
-        default='postgresql://postgres:postgres@localhost:5432/m4aceblogdb',        
-        conn_max_age=600
-    )
+     'default': dj_database_url.config( 
+         default='postgresql://postgres:postgres@localhost:5432/m4aceblogdb',        
+         conn_max_age=600
+     )
     
 }
 AUTH_USER_MODEL="accounts.User"
@@ -193,12 +196,17 @@ MEDIA_URL = 'media/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # This is just for testing
-EMAIL_HOST = 'sandbox.smtp.mailtrap.io'
+FRONTEND_URL = 'http://localhost:8000'
+
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT =465
+EMAIL_USE_TLS = False
+EMAIL_USE_SSL = True
 EMAIL_HOST_USER = env('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
-DEFAULT_FROM_EMAIL = 'info@mtrends.com'
-EMAIL_PORT = '2525'
-EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = 'uniqueconceptsinitiative@gmail.com'
 
 
 # Settings for social accounts

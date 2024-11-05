@@ -12,7 +12,7 @@ from rest_framework_simplejwt.views import TokenRefreshView
 
 urlpatterns=[
     path('register/', RegisterUserView.as_view(), name='register'),
-    path('verify-email/', VerifyUserEmail.as_view(), name='verify'),
+    path('verify-email/', VerifyUserEmail.as_view(), name='verify_email'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token-refresh'),
     path('login/', LoginUserView.as_view(), name='Login'),
     path('password-reset/', PasswordResetRequestView.as_view(), name='reset-password-confirm'),
