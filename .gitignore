@@ -1,5 +1,7 @@
-venv
+.venv
 accounts/migrations
 social_accounts/migrations
 db.sqlite3
 .env
+__pycache__
+
