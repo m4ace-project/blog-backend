@@ -34,7 +34,8 @@ environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+#DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*', 'http://localhost:5173']
 
@@ -57,11 +58,12 @@ INSTALLED_APPS = [
     'social_accounts',
     'blog',
     'userProfile',
-     'ckeditor',
+    'ckeditor',
+    'storages',
 ]
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
+    
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -106,10 +108,10 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 DATABASES = {
     
-    # 'default': {
-    #     'ENGINE': 'django.db.backends.sqlite3',
-    #     'NAME': BASE_DIR / 'db.sqlite3',
-    # },
+    'default': {
+         'ENGINE': 'django.db.backends.sqlite3',
+         'NAME': BASE_DIR / 'db.sqlite3',
+     },
     
     
      "offline_postgress": {
@@ -120,7 +122,7 @@ DATABASES = {
         "HOST": "localhost",
         "PORT": "5432",
         },
-     'default': dj_database_url.config( 
+     'online': dj_database_url.config( 
          default='postgresql://postgres:postgres@localhost:5432/m4aceblogdb',        
          conn_max_age=600
      )
@@ -137,7 +139,7 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=180),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
     "AUTH_HEADER_TYPES": ("Bearer",),
 }
@@ -187,8 +189,7 @@ if not DEBUG:    # Tell Django to copy static assets into a path called `staticf
 
 #===========================================================
 
-MEDIA_ROOT = BASE_DIR / 'media'
-MEDIA_URL = 'media/'
+#MEDIA_ROOT = BASE_DIR / 'media'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -201,12 +202,16 @@ FRONTEND_URL = 'http://localhost:8000'
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
+#EMAIL_HOST = 'mail.info@blog.m4ace.com'
 EMAIL_PORT =465
 EMAIL_USE_TLS = False
 EMAIL_USE_SSL = True
 EMAIL_HOST_USER = env('EMAIL_HOST_USER')
+#EMAIL_HOST_USER = 'info@blog.m4ace.com'
 EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
-DEFAULT_FROM_EMAIL = 'uniqueconceptsinitiative@gmail.com'
+#EMAIL_HOST_PASSWORD = 'M4ACEBLOG1'
+#DEFAULT_FROM_EMAIL = 'uniqueconceptsinitiative@gmail.com'
+DEFAULT_FROM_EMAIL = 'info@blog.m4ace.com'
 
 
 # Settings for social accounts
@@ -214,3 +219,18 @@ GOOGLE_CLIENT_ID = env('GOOGLE_CLIENT_ID')
 GOOGLE_CLIENT_SECRET = env('GOOGLE_CLIENT_SECRET')
 SOCIAL_AUTH_PASSWORD = env('SOCIAL_PASSWORD')
 
+
+# AWS S3 Bucket Configuration
+AWS_ACCESS_KEY_ID = env('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = env('AWS_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = env('AWS_STORAGE_BUCKET_NAME')
+AWS_S3_REGION_NAME = 'us-east-1'  # e.g., 'us-east-1'
+AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.{AWS_S3_REGION_NAME}.s3.amazonaws.com"
+AWS_DEFAULT_ACL = 'public-read'
+AWS_QUERYSTRING_AUTH = False
+
+# Media Files Storage
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
+# Media URL
+MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/media/"

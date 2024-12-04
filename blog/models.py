@@ -1,12 +1,14 @@
 from django.db import models
 from ckeditor.fields import RichTextField
 from django.utils import timezone
-
+from accounts.models import User
+from userProfile.models import ContentCreatorProfile
 
 # Create your models here.
 
 class Category(models.Model):
      name = models.CharField(max_length=30)
+     
      class Meta:
           verbose_name_plural = "Categories"
      def __str__(self):
@@ -21,7 +23,7 @@ class Post(models.Model):
     media = models.JSONField(blank=True, null=True)    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
-    is_published = models.BooleanField(default=False)
+    is_published = models.BooleanField(default=True)
     published_at = models.DateTimeField(null=True, blank=True)
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True)
     
@@ -51,22 +53,22 @@ class Comment(models.Model):
           return f"Comment by {self.author.username} on {self.post.title}"
      
 
-class Reaction(models.Model):
-     REACTION_TYPES = [
-          ('like', 'Like'),
-          ('love', 'Love'),
-          ('laugh', 'Laugh'),
-          ('angry', 'Angry'),
-          ('sad', 'Sad'),
-     ]
-
-     user = models.ForeignKey('accounts.User', on_delete=models.CASCADE)
-     post = models.ForeignKey('Post', related_name='reactions', on_delete=models.CASCADE)
-     reaction_type = models.CharField(max_length=10, choices=REACTION_TYPES)
+class Like(models.Model):
+     id = models.BigAutoField(primary_key=True)
+     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="Likes")
+     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="Likes")
      created_at = models.DateTimeField(auto_now_add=True)
 
      class Meta:
-          unique_together = ('user', 'post')      # Ensures each user can react only once per post
+          unique_together = ('user', 'post')  # Ensure a user can like a post only once
 
      def __str__(self):
-          return f"{self.user} reacted {self.reaction_type} on {self.post}"
+          return f"{self.user.email} liked {self.post.title}"
+     
+class ReaderCategory(models.Model):
+     reader = models.ForeignKey(User, on_delete=models.CASCADE, related_name="reader_categories")
+     category = models.ForeignKey(Category, on_delete=models.CASCADE)
+     author = models.ForeignKey(ContentCreatorProfile, on_delete=models.CASCADE, related_name="favourite_by_readers")
+
+     def __str__(self):
+          return f"Reader ID: {self.reader.id} - Category: {self.category.name} - Author: {self.author.name}"

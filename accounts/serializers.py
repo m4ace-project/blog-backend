@@ -1,6 +1,7 @@
 import json
 from dataclasses import field
 from .models import User
+from userProfile.models import ContentCreatorProfile, ReaderProfile
 from rest_framework import serializers
 from string import ascii_lowercase, ascii_uppercase
 from django.contrib.auth import authenticate
@@ -10,7 +11,7 @@ from django.utils.encoding import smart_str, force_str, smart_bytes
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.contrib.sites.shortcuts import get_current_site
 from django.urls import reverse
-from .utils import send_normal_email
+from .utils import send_otp_email, send_normal_email
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 
 
@@ -47,29 +48,55 @@ class LoginSerializer(serializers.ModelSerializer):
     role = serializers.CharField(read_only=True)   
     access_token=serializers.CharField(max_length=255, read_only=True)
     refresh_token=serializers.CharField(max_length=255, read_only=True)
+    name = serializers.SerializerMethodField()
+    
+
 
     class Meta:
         model = User
-        fields = ['id', 'email', 'password', 'role', 'access_token', 'refresh_token']
+        fields = ['id', 'email', 'password', 'role', 'access_token', 'refresh_token', 'name']
+    
+    def get_name(self, obj):
+        user = obj if isinstance(obj, User) else None
+        if user:
+            profile = None
+            if user.role == 'content_creator':
+                profile = ContentCreatorProfile.objects.filter(user=user).first()
+            elif user.role == 'reader':
+                profile = ReaderProfile.objects.filter(user=user).first()
+            return profile.name if profile else None
 
-    def validate(self, attrs):
-        id = attrs.get('id')
+    def validate(self, attrs):        
         email = attrs.get('email')
-        password = attrs.get('password')
-        role = attrs.get('role')
-        request=self.context.get('request')
+        password = attrs.get('password')        
+        request= self.context.get('request')
         user = authenticate(request, email=email, password=password)
+
         if not user:
-            raise AuthenticationFailed("invalid credential try again")
+            raise AuthenticationFailed("Invalid credentials try again")
         if not user.is_verified:
             raise AuthenticationFailed("Email is not verified")
-        tokens=user.tokens()
+        
+        self.context['user'] = user
+        return user
+    
+    def to_representation(self, instance):
+        user = instance
+        profile = None
+        if  user.role == 'content_creator':
+            profile = ContentCreatorProfile.objects.filter(user=user).first()
+        elif user.role == 'reader':
+            profile = ReaderProfile.objects.filter(user=user).first()
+
+        tokens = user.tokens()
+
         return {
             'id':user.id,
             'email':user.email,
             'role':user.role,
             "access_token":str(tokens.get('access')),
-            "refresh_token":str(tokens.get('refresh'))
+            "refresh_token":str(tokens.get('refresh')),
+            "name": profile.name if profile else None,
         }
           
 class PasswordResetRequestSerializer(serializers.Serializer):
