@@ -34,8 +34,8 @@ environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-#DEBUG = False
-DEBUG = True
+DEBUG = False
+#DEBUG = True
 
 ALLOWED_HOSTS = ['*', 'http://localhost:5173']
 
@@ -108,7 +108,7 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 DATABASES = {
     
-    'default': {
+    'offline': {
          'ENGINE': 'django.db.backends.sqlite3',
          'NAME': BASE_DIR / 'db.sqlite3',
      },
@@ -122,7 +122,7 @@ DATABASES = {
         "HOST": "localhost",
         "PORT": "5432",
         },
-     'online': dj_database_url.config( 
+     'default': dj_database_url.config( 
          default='postgresql://postgres:postgres@localhost:5432/m4aceblogdb',        
          conn_max_age=600
      )
