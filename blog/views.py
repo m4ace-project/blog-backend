@@ -13,7 +13,7 @@ from django.shortcuts import get_object_or_404
 # View to see first 200 characters of a blog post
 class ViewPosts(APIView):
     def get(self, request):
-        posts = Post.objects.filter(is_published= True)
+        posts = Post.objects.all()
         serializer = PostListSerializer(posts, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -25,7 +25,7 @@ class PostList(APIView):
 
         # Check if the user is a reader and filter posts accordingly.
         if request.user.role == 'reader':
-            posts = Post.objects.filter(is_published=True)
+            posts = Post.objects.all()
 
         else:
             posts = Post.objects.all()
@@ -45,7 +45,7 @@ class PostList(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# Retrieve, update or de;ete a particular post.
+# Retrieve, update or delete a particular post.
 
 class PostDetail(APIView):
     permission_classes = [IsAuthenticated]
@@ -82,7 +82,7 @@ class PostDetail(APIView):
 
     
 class CategoryList(APIView):
-    permission_classes = [IsAuthenticated]
+    #permission_classes = [IsAuthenticated]
     def get(self, request):
         categories = Category.objects.all()
         serializer = CategorySerializer(categories, many=True)

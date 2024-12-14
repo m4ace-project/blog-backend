@@ -9,14 +9,14 @@ class PostSerializer(serializers.ModelSerializer):
 
     class Meta:
       model = Post
-      fields = ['post_id', 'title', 'content', 'category', 'created_at', 'updated_at', 'is_published', 'published_at']
+      fields = ['post_id', 'title', 'content', 'category', 'blog_pic', 'created_at', 'updated_at', 'is_published', 'published_at']
 
 class PostListSerializer(serializers.ModelSerializer):
    preview = serializers.SerializerMethodField()
 
    class Meta:
       model = Post
-      fields = ['post_id', 'title', 'preview', 'category', 'created_at', 'updated_at', 'is_published', 'published_at']
+      fields = ['post_id', 'title', 'preview', 'blog_pic', 'category', 'created_at', 'updated_at', 'is_published', 'published_at']
 
    def get_preview(self, obj):
       return obj.content[:200] + ('...' if len(obj.content) > 200 else '')

@@ -20,23 +20,23 @@ class Post(models.Model):
     author = models.ForeignKey('accounts.User', on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
     content = RichTextField(blank=False, null=False)
-    media = models.JSONField(blank=True, null=True)    
+    blog_pic = models.ImageField(upload_to='blog_pics', null=False, blank=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True, null=True)
     is_published = models.BooleanField(default=True)
     published_at = models.DateTimeField(null=True, blank=True)
-    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True)
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=False, blank=False)
     
 
-    def save(self, *args, **kwargs):
-         # Check if the post is being published for the first time
-         if self.is_published and self.published_at is None:
-              self.published_at = timezone.now()
+#     def save(self, *args, **kwargs):
+#          # Check if the post is being published for the first time
+#          if self.is_published and self.published_at is None:
+#               self.published_at = timezone.now()
 
-         elif not self.is_published:
-              self.published_at = None      # Clear published date if unpublished
+#          elif not self.is_published:
+#               self.published_at = None      # Clear published date if unpublished
 
-         super().save(*args, **kwargs)
+#          super().save(*args, **kwargs)
 
     def __str__(self):
         return self.title
